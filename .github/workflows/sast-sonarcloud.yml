@@ -1,34 +1,39 @@
 name: SAST com SonarCloud
-
+        
 on:
   push:
     branches: [ main ]
   pull_request:
-
+        
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-
+      
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-
+      
       - name: Install dependencies
         run: npm install
-
+      
       - name: Run SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        # Ação atualizada para a versão recomendada:
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         with:
-          organization: ${{ secrets.SONAR_ORG }}
-          projectKey: ${{ secrets.SONAR_PROJECT }}
-          token: ${{ secrets.SONAR_TOKEN }}
+          # Parâmetros obrigatórios passados via 'args' (argumentos do scanner)
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT }}
+        env:
+          # O token é passado como variável de ambiente 'SONAR_TOKEN'
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
